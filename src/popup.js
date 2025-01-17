@@ -58,8 +58,7 @@ function formatTimestampsForCopy(timestamps, videoInfo) {
   const url = videoInfo.url;
   const title = videoInfo.title;
   const formattedTimestamps = timestamps.map(t => `~${formatTime(t.time)} ${''.padEnd(t.level, '.')}${t.description}`).join('\n');
-  
-  return `${title}\n${url}\n[~VodTS~]\n${formattedTimestamps}`;
+  return `${title}\n${url}\n[~VodTS~]\n${formattedTimestamps}\n[~VodTS~]`;
 }
 
 function parseTimestamps(text) {
@@ -315,6 +314,29 @@ function initPopup() {
     onlyVodtsCheckbox.checked = result.onlyVodTS || false;
     displayMarkerCheckbox.checked = result.displayMarker !== false;
   });
+
+// Add keyboard shortcut listener for Firefox
+document.addEventListener('keydown', (event) => {
+  // Only handle 'a' and 'r' when no input is focused
+  if (document.activeElement.tagName !== 'INPUT') {
+    if (event.key === 'a') {
+      event.preventDefault(); // Prevent 'a' from being added to any input
+      showAddTimestampPopup();
+    } else if (event.key === 'r') {
+      event.preventDefault(); // Prevent 'r' from being added to any input
+      document.getElementById('timestamps').innerHTML = '<p>Reloading timestamps...</p>';
+      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+        chrome.tabs.sendMessage(tabs[0].id, {action: 'reloadTimestamps'}, (response) => {
+          if (response && response.success) {
+            loadTimestamps();
+          } else {
+            alert('Failed to reload timestamps');
+          }
+        });
+      });
+    }
+  }
+});
 }
 
 document.addEventListener('DOMContentLoaded', initPopup);

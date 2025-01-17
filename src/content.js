@@ -75,7 +75,7 @@ function getVideoInfo() {
       return {
         title: title,
         url: url,
-        currentTime: twitchLiveTimeElement ? parseTimeString(twitchLiveTimeElement.textContent) : 0,
+        currentTime: twitchLiveTimeElement ? parseTimeString(twitchLiveTimeElement.querySelector('span[aria-hidden="true"]').textContent) : 0,
         duration: 0
       };
     }
